@@ -31,6 +31,7 @@ pub fn animation_system(
         match animation.as_mut() {
             Animation::Start(animation_handle) => {
                 if let Some(tag) = animation_tags.get(animation_handle) {
+                    println!("TAG: {:?}", tag);
                     *animation = Animation::Run {
                         tag: animation_handle.clone(),
                         frame: 0,

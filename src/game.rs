@@ -1,16 +1,16 @@
 use bevy::prelude::*;
 
-use crate::animation::{Animation, AnimationTag};
+use crate::{
+    animation::{Animation, AnimationTag},
+    GameAssets,
+};
 
-pub fn setup_game(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let player_atlas_handle: Handle<TextureAtlas> = asset_server.load("sheets/player.sheet.json");
-    let walk_anim_handle: Handle<AnimationTag> = asset_server.load("sheets/player.sheet.json#Walk");
-
+pub fn setup_game(mut commands: Commands, assets: Res<GameAssets>) {
     commands
         .spawn_bundle(SpriteSheetBundle {
-            texture_atlas: player_atlas_handle,
-            transform: Transform::from_xyz(20., 20., 0.),
+            texture_atlas: assets.player_atlas.clone(),
+            transform: Transform::from_xyz(20., -40., 0.),
             ..default()
         })
-        .insert(Animation::Start(walk_anim_handle));
+        .insert(Animation::Start(assets.player_walk.clone()));
 }

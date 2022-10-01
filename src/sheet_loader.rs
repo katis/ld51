@@ -29,6 +29,7 @@ impl AssetLoader for SpriteSheetLoader {
     ) -> BoxedFuture<'a, Result<(), bevy::asset::Error>> {
         Box::pin(async move {
             let sheet_data: SheetData = serde_json::from_slice(bytes)?;
+            dbg!(&sheet_data);
 
             let texture_path = format!("sheet_textures/{}", &sheet_data.meta.image);
             let texture_path = AssetPath::new_ref(Path::new(&texture_path), None);
@@ -48,12 +49,12 @@ impl AssetLoader for SpriteSheetLoader {
                 });
                 frames.push(Frame {
                     texture_index,
-                    duration: Duration::from_millis(*duration as u64),
+                    duration: Duration::from_millis(*duration),
                 });
             }
 
             let mut atlas_asset = LoadedAsset::new(texture_atlas);
-            atlas_asset.add_dependency(texture_path);
+            atlas_asset.add_dependency(texture_path.clone());
 
             for tag in sheet_data.meta.frame_tags.into_iter() {
                 let animation_tag = AnimationTag(
@@ -62,7 +63,10 @@ impl AssetLoader for SpriteSheetLoader {
                         .map(|idx| frames[idx as usize].clone())
                         .collect(),
                 );
-                load_context.set_labeled_asset(&tag.name, LoadedAsset::new(animation_tag));
+                load_context.set_labeled_asset(
+                    &tag.name,
+                    LoadedAsset::new(animation_tag).with_dependency(texture_path.clone()),
+                );
             }
 
             load_context.set_default_asset(atlas_asset);
@@ -106,7 +110,7 @@ pub struct Size {
 #[derive(Debug, Deserialize)]
 pub struct SheetFrame {
     pub frame: BoundingBox,
-    pub duration: i32,
+    pub duration: u64,
 }
 
 #[derive(Debug, Deserialize)]
